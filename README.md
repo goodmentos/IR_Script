@@ -1,0 +1,752 @@
+::# IR_Script
+::(Windows 11)
+
+@echo off
+chcp 65001
+title K-Shield Jr
+color F0
+
+:: 지역변수 설정
+SETLOCAL
+
+:: 관리자 권한 실행
+PUSHD %~dp0
+
+:: 컴퓨터 이름
+set hostname=%COMPUTERNAME%
+
+:: OS Architecture
+if "%PROCESSOR_ARCHITECTURE%" == "AMD64" ( set _yoursystem=Windowsx64 ) else ( set _yoursystem=Windowsx86 )
+echo.
+echo The system in use is %_yoursystem%.
+echo.
+
+:: 작업자 이름
+set /p CaseName=(!) Please enter the name of the worker. :
+echo.
+echo The name of the worker you entered is %CaseName%.
+echo.
+
+:: 변수 설정
+set "tool_path=tools"
+set "output_path=%CD%\result"
+if not exist "%output_path%" (
+    mkdir "%output_path%"
+    echo mkdir : result
+) else (
+    echo 0
+)
+echo.
+
+:SET_Ss_Disk
+set /p _Ss_Disk=(!) Do you want to run the script? ("n" Exit the program on input):
+if /i "%_Ss_Disk%" == "y" GOTO:SELECT
+if /i "%_Ss_Disk%" == "n" GOTO:END
+
+:SELECT
+echo.
+echo (!) Please check the list you want to run.
+echo -------------------------------------------------------------------------------------------------
+echo    1. Full Execution
+echo.
+echo    2. Volatile artifacts
+echo.
+echo    3. Nonvolatile artifacts
+echo.
+echo	  4. END
+echo -------------------------------------------------------------------------------------------------
+set /p Select=(!) input num : 
+
+if "%Select%"=="1" (set _access=all)
+if "%Select%"=="2" (set _access=vo-arti)
+if "%Select%"=="3" (set _access=non-arti)
+if "%Select%"=="4" (set _access=END)
+
+if "%_access%"=="all" GOTO:vo-arti
+if "%_access%"=="vo-arti" GOTO:vo-arti
+if "%_access%"=="non-arti" GOTO:non-arti
+if "%_access%"=="END" GOTO:END
+::--------------------------------------------------
+
+:vo-arti
+
+set "result_folder=%output_path%"
+set "Volatile_result=%result_folder%\Volatile_result"
+set "process_result=%Volatile_result%\process"
+set "process_result_0=%process_result%\process_list"
+set "process_result_1=%process_result%\process_tree"
+set "process_result_2=%process_result%\process_handle"
+set "process_result_3=%process_result%\process_commdline"
+set "process_result_4=%process_result%\process_dll
+
+if not exist "%Volatile_result%" (
+    mkdir "%Volatile_result%"
+    echo mkdir : Volatile_result
+)
+
+if not exist "%process_result%" (
+    mkdir "%process_result%"
+    echo mkdir : process_result
+)
+
+if not exist "%process_result_0%" (
+    mkdir "%process_result_0%"
+    echo mkdir : process_result_0
+)
+
+if not exist "%process_result_1%" (
+    mkdir "%process_result_1%"
+    echo mkdir : process_result_1
+)
+
+if not exist "%process_result_2%" (
+    mkdir "%process_result_2%"
+    echo mkdir : process_result_2
+)
+
+if not exist "%process_result_3%" (
+    mkdir "%process_result_3%"
+    echo mkdir : process_result_3
+)
+
+if not exist "%process_result_4%" (
+    mkdir "%process_result_4%"
+    echo mkdir : process_result_4
+)
+
+
+:: 프로세스 list
+:: pslist
+set "pslist_path=%tool_path%\pslist.exe"
+set "output_pslist=%process_result_0%\pslist.txt"
+"%pslist_path%" > "%output_pslist%"
+
+:: cprocess
+set "cprocess_path=%tool_path%\cprocess.exe"
+set "output_cprocess=%process_result_0%\cprocess.txt"
+"%cprocess_path%" /stext "%output_cprocess%"
+
+:: procinterrogate
+set "procinterrogate_path=%tool_path%\procinterrogate.exe"
+set "output_procinterrogate=%process_result_0%\procinterrogate.txt"
+"%procinterrogate_path%" -list -md5 -ver -o > "%output_procinterrogate%"
+
+:: tasklist
+set "tasklist_path=%tool_path%\tasklist.exe"
+set "output_tasklist=%process_result_0%\tasklist.txt"
+"%tasklist_path%" -V > "%output_tasklist%"
+
+:: 프로세스 트리
+:: process tree
+set "tlist_path=%tool_path%\tlist.exe"
+set "output_tlist=%process_result_1%\tlist.txt"
+"%tlist_path%" -t > "%output_tlist%"
+
+:: pslist
+set "pslist_path=%tool_path%\pslist.exe"
+set "output_pslist1=%process_result_1%\pslist.txt"
+"%pslist_path%" -t > "%output_pslist1%"
+
+:: 프로세스 핸들
+:: handle
+set "handle_path=%tool_path%\handle.exe"
+set "output_handle=%process_result_2%\handle.txt"
+"%handle_path%" -a > "%output_handle%"
+
+:: openedfileview
+set "openedfilesview_path=%tool_path%\openedfilesview.exe"
+set "output_openedfilesview=%process_result_2%\openedfilesview.txt"
+"%openedfilesview_path%" /stext "%output_openedfilesview%"
+
+:: listobj
+set "listobj_path=%tool_path%\listobj.exe"
+set "output_openedfilesview=%process_result_2%\listobj.txt"
+"%listobj_path%" > "%output_listobj%"
+
+:: 프로세스 커맨드라인
+:: tlist
+set "tlist_path=%tool_path%\tlist.exe"
+set "output_tlist1=%process_result_3%\tlist.txt"
+"%tlist_path%" -c > "%output_tlist1%"
+
+:: 프로세스 DLL
+:: listdlls
+set "listdlls_path=%tool_path%\listdlls.exe"
+set "output_listdlls=%process_result_4%\listdlls.txt"
+"%listdlls_path%" -v > "%output_listdlls%"
+
+:: dllexp
+set "dllexp_path=%tool_path%\dllexp.exe"
+set "output_dllexp=%process_result_4%\dllexp.txt"
+"%dllexp_path%" /stext "%output_dllexp%"
+
+:: injecteddll
+set "injecteddll_path=%tool_path%\injecteddll.exe"
+set "output_injecteddll=%process_result_4%\injecteddll.txt"
+"%injecteddll_path%" /stext "%output_injecteddll%"
+
+:: 네트워크 세션
+
+set "network_session_result=%Volatile_result%\network_session"
+
+if not exist "%network_session_result%" (
+    mkdir "%network_session_result%"
+    echo mkdir : network_session_result
+)
+
+:: tcp/ip
+set "netstat_path=%tool_path%\netstat.exe"
+set "output_netstat=%network_session_result%\tcpip_netstat.txt"
+"%netstat_path%" -nao > "%output_netstat%"
+
+:: tcpvcon
+set "tcpvcon_path=%tool_path%\tcpvcon.exe"
+set "output_tcpvcon=%network_session_result%\tcpip_tcpvcon.txt"
+"%tcpvcon_path%" /a /c > "%output_tcpvcon%"
+
+:: url 
+set "urlprotocolview_path=%tool_path%\urlprotocolview.exe"
+set "output_urlprotocolview=%network_session_result%\urlprotocolview.txt"
+"%urlprotocolview_path%" /stext "%output_urlprotocolview%"
+
+:: 네트워크
+
+set "network_result=%Volatile_result%\network"
+
+if not exist "%network_result%" (
+    mkdir "%network_result%"
+    echo mkdir : network_result
+)
+
+:: promiscdetect
+set "promiscdetect_path=%tool_path%\promiscdetect.exe"
+set "output_promiscdetect=%network_result%\promiscdetect.txt"
+"%promiscdetect_path%" > "%output_promiscdetect%"
+
+:: ipconfig
+set "ipconfig_path=%tool_path%\ipconfig.exe"
+set "output_ipconfig=%network_result%\ipconfig_NIC.txt"
+"%ipconfig_path%" /all > "%output_ipconfig%"
+
+:: getmac
+set "getmac_path=%tool_path%\getmac.exe"
+set "output_getmac=%network_result%\getmac_NIC.txt"
+"%getmac_path%" > "%output_getmac%"
+
+:: ipconfig_dns
+set "ipconfig_path=%tool_path%\ipconfig.exe"
+set "output_ipconfig1=%network_result%\ipconfig_dns.txt"
+"%ipconfig_path%" /displaydns > "%output_ipconfig1%"
+
+:: 로컬 세션
+
+set "local_session_result=%Volatile_result%\local_session"
+
+if not exist "%local_session_result%" (
+    mkdir "%local_session_result%"
+    echo mkdir : local_session_result
+)
+
+:: net_session
+set "net_session_path=%tool_path%\net.exe"
+set "output_net_session=%local_session_result%\net_session.txt"
+"%net_session_path%" session > "%output_net_session%"
+
+:: 드라이버
+
+set "driver_result=%Volatile_result%\driver"
+
+if not exist "%driver_result%" (
+    mkdir "%driver_result%"
+    echo mkdir : driver_result
+)
+
+:: driverview
+set "driverview_path=%tool_path%\driverview.exe"
+set "output_driverview=%driver_result%\driverview.txt"
+"%driverview_path%" /stext "%output_driverview%"
+
+:: listdrivers
+set "listdrivers_path=%tool_path%\listdrivers.exe"
+set "output_listdrivers=%driver_result%\listdrivers.txt"
+"%listdrivers_path%" > "%output_listdrivers%"
+
+:: 서비스
+
+set "service_result=%Volatile_result%\service"
+
+if not exist "%service_result%" (
+    mkdir "%service_result%"
+    echo mkdir : service_result
+)
+
+:: tasklist_svc
+set "tasklist_path=%tool_path%\tasklist.exe"
+set "output_tasklist=%service_result%\tasklist_svc.txt"
+"%tasklist_path%" -svc > "%output_tasklist%"
+
+:: tasklist_apps
+set "tasklist_path=%tool_path%\tasklist.exe"
+set "output_tasklist1=%service_result%\tasklist_apps.txt"
+"%tasklist_path%" -apps > "%output_tasklist1%"
+
+
+:: psservice
+set "psservice_path=%tool_path%\psservice.exe"
+set "output_psservice=%service_result%\psservice.txt"
+"%psservice_path%" > "%output_psservice%"
+
+:: tlist
+set "tlist_path=%tool_path%\tlist.exe"
+set "output_tlist2=%service_result%\tlist.txt"
+"%tlist_path%" -s > "%output_tlist2%"
+
+:: tcp/ip 오픈 포트
+
+set "open_port_result=%Volatile_result%\open_port"
+
+if not exist "%open_port_result%" (
+    mkdir "%open_port_result%"
+    echo mkdir : open_port_result
+)
+
+:: cports
+set "cports_path=%tool_path%\cports.exe"
+set "output_cports=%open_port_result%\cports.txt"
+"%cports_path%" /stext "%output_cports%"
+
+:: netstat
+set "netstat_path=%tool_path%\netstat.exe"
+set "output_netstat1=%open_port_result%\netstat.txt"
+"%netstat_path%" -nao | findstr LISTENING > "%output_netstat1%"
+
+:: 로그온
+
+set "logon_result=%Volatile_result%\logon"
+
+if not exist "%logon_result%" (
+    mkdir "%logon_result%"
+    echo mkdir : logon_result
+)
+
+:: net
+set "net_path=%tool_path%\net.exe"
+set "output_net1=%logon_result%\net_local_user.txt"
+"%net_path%" session > "%output_net1%"
+
+:: logonsessions
+set "logonsessions_path=%tool_path%\logonsessions.exe"
+set "output_logonsessions=%logon_result%\logonsessions.txt"
+"%logonsessions_path%" > "%output_logonsessions%"
+
+:: winlogonview
+set "winlogonview_path=%tool_path%\winlogonview.exe"
+set "output_winlogonview=%logon_result%\winlogonview.txt"
+"%winlogonview_path%" /stext "%output_winlogonview%"
+
+:: 계정 및 그룹
+
+set "accounts_groups_result=%Volatile_result%\accounts_groups"
+
+if not exist "%accounts_groups_result%" (
+    mkdir "%accounts_groups_result%"
+    echo mkdir : accounts_groups_result
+)
+
+:: user account list
+set "net_path=%tool_path%\net.exe"
+set "output_net2=%accounts_groups_result%\net_local_user.txt"
+"%net_path%" user > "%output_net2%"
+
+:: Administrator Group List
+set "net_path=%tool_path%\net.exe"
+set "output_net3=%accounts_groups_result%\net_local_Administrator.txt"
+"%net_path%" administrators > "%output_net3%"
+
+:: 공유 자원
+
+set "accounts_groups_result=%Volatile_result%\Shared"
+
+if not exist "%Shared_result%" (
+    mkdir "%Shared_result%"
+    echo mkdir : Shared_result
+)
+
+:: share dir
+set "net_path=%tool_path%\net.exe"
+set "output_net4=%Shared_result%\share_dir.txt"
+"%net_path%" share > "%output_net4%"
+
+:: share file
+set "net_path=%tool_path%\net.exe"
+set "output_net5=%Shared_result%\share_file.txt"
+"%net_path%" share > "%output_net5%"
+
+:: 넷바이오스
+
+set "NetBIOS_result=%Volatile_result%\NetBIOS"
+
+if not exist "%NetBIOS_result%" (
+    mkdir "%NetBIOS_result%"
+    echo mkdir : NetBIOS_result
+)
+
+:: NBT cache
+set "nbtstat_path=%tool_path%\nbtstat.exe"
+set "output_nbtstat=%NetBIOS_result%\nbtstat_cache.txt"
+"%nbtstat_path%" -c > "%output_nbtstat%"
+
+:: NBT local
+set "nbtstat_path=%tool_path%\nbtstat.exe"
+set "output_nbtstat1=%NetBIOS_result%\nbtstat_local.txt"
+"%nbtstat_path%" -n > "%output_nbtstat1%"
+
+:: NBT Session
+set "nbtstat_path=%tool_path%\nbtstat.exe"
+set "output_nbtstat2=%NetBIOS_result%\nbtstat_session.txt"
+"%nbtstat_path%" -s > "%output_nbtstat2%"
+
+:: ARP
+
+set "ARP_result=%Volatile_result%\ARP"
+
+if not exist "%ARP_result%" (
+    mkdir "%ARP_result%"
+    echo mkdir : ARP_result
+)
+
+:: arp
+set "arp_path=%tool_path%\arp.exe"
+set "output_arp=%ARP_result%\arp.txt"
+"%arp_path%" -a -v > "%output_arp%"
+
+:: 라우팅
+
+set "route_result=%Volatile_result%\route"
+
+if not exist "%route_result%" (
+    mkdir "%route_result%"
+    echo mkdir : route_result
+)
+
+::route
+set "route_path=%tool_path%\route.exe"
+set "output_route=%route_result%\route.txt"
+"%route_path%" PRINT -4 > "%output_route%"
+
+:: 설치 목록
+
+set "Installed_Windows_result=%Volatile_result%\Installed_Windows"
+
+if not exist "%Installed_Windows_result%" (
+    mkdir "%Installed_Windows_result%"
+    echo mkdir : Installed_Windows_result
+)
+:: 힘들다 살려주세요 제발
+
+:: Windows update
+set "systeminfo_path=%tool_path%\systeminfo.exe"
+set "output_systeminfo=%Installed_Windows_result%\systeminfo_win_update.txt"
+"%systeminfo_path%" > "%output_systeminfo%"
+
+:: Windows Hot fix
+set "psinfo_path=%tool_path%\psinfo.exe"
+set "output_psinfo=%Installed_Windows_result%\psinfo_hotfix.txt"
+"%psinfo_path%" -h > "%output_psinfo%"
+"%psinfo_path%" -s -d >> "%output_psinfo%"
+
+:: 자동 실행
+
+set "auto_exeu_result=%Volatile_result%\auto_exeu"
+
+if not exist "%auto_exeu_result%" (
+    mkdir "%auto_exeu_result%"
+    echo mkdir : auto_exeu_result
+)
+
+:: boot exeute
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc=%auto_exeu_result%\boot_exeute.txt"
+"%autorunsc_path%" -b -nobanner -accepteula > "%output_autorunsc%"
+
+:: Codecs
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc1=%auto_exeu_result%\codecs.txt"
+"%autorunsc_path%" -c -nobanner -accepteula > "%output_autorunsc1%"
+
+:: Appinit DLLs
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc2=%auto_exeu_result%\appinit_dlls.txt"
+"%autorunsc_path%" -a -nobanner -accepteula > "%output_autorunsc2%"
+
+:: Explorer Addons
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc3=%auto_exeu_result%\explorer_addons.txt"
+"%autorunsc_path%" -e -nobanner -accepteula > "%output_autorunsc3%"
+
+:: Sidebar Gadgets
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc4=%auto_exeu_result%\Sidebar_Gadgets.txt"
+"%autorunsc_path%" -g -nobanner -accepteula > "%output_autorunsc4%"
+
+:: Image Hijacks
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc5=%auto_exeu_result%\Image_Hijacks.txt"
+"%autorunsc_path%" -i -nobanner -accepteula > "%output_autorunsc5%"
+
+:: Internet Explorer Addons
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc6=%auto_exeu_result%\IE_Addons.txt"
+"%autorunsc_path%" -o -nobanner -accepteula > "%output_autorunsc6%"
+
+:: Known DLLs
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc7=%auto_exeu_result%\Known_DLLs.txt"
+"%autorunsc_path%" -k -nobanner -accepteula > "%output_autorunsc7%"
+
+:: Logon Startups
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc8=%auto_exeu_result%\Logon_Startups.txt"
+"%autorunsc_path%" -l -nobanner -accepteula > "%output_autorunsc8%"
+
+:: WMI Entries
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc9=%auto_exeu_result%\WMI_Entries.txt"
+"%autorunsc_path%" -m -nobanner -accepteula > "%output_autorunsc9%"
+
+:: Winsock Protocol and Network Providers
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc10=%auto_exeu_result%\Winsock_Protocol_Network_Providers.txt"
+"%autorunsc_path%" -w -nobanner -accepteula > "%output_autorunsc10%"
+
+:: Office Addins
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc11=%auto_exeu_result%\Office_Addins.txt"
+"%autorunsc_path%" -r -nobanner -accepteula > "%output_autorunsc11%"
+
+:: Printer Monitor DLLs
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc12=%auto_exeu_result%\Printer_Monitor_DLLs.txt"
+"%autorunsc_path%" -p -nobanner -accepteula > "%output_autorunsc12%"
+
+:: LSA Security Providers
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc13=%auto_exeu_result%\LSA_Security_Providers.txt"
+"%autorunsc_path%" -s -nobanner -accepteula > "%output_autorunsc13%"
+
+:: Autostart Services and Non-disabled Drivers
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc14=%auto_exeu_result%\Autostart_Services.txt"
+"%autorunsc_path%" -y -nobanner -accepteula > "%output_autorunsc14%"
+
+:: Scheduled Tasks
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc15=%auto_exeu_result%\Scheduled_Tasks.txt"
+"%autorunsc_path%" -t -nobanner -accepteula > "%output_autorunsc15%"
+
+:: Winlogon Entries
+set "autorunsc_path=%tool_path%\autorunsc.exe"
+set "output_autorunsc16=%auto_exeu_result%\Winlogon_Entries.txt"
+"%autorunsc_path%" -n -nobanner -accepteula > "%output_autorunsc16%"
+
+:: 파이프
+set "pipe_result=%Volatile_result%\pipe"
+
+if not exist "%pipe_result%" (
+    mkdir "%pipe_result%"
+    echo mkdir : pipe_result
+)
+
+:: pipelist
+set "pipe_path=%tool_path%\pipelist.exe"
+set "output_pipe=%pipe_result%\pipelist.txt"
+"%pipe_path%" > "%output_pipe%"
+
+
+if "%_access%"=="all" GOTO:non-arti
+if "%_access%"=="vo-arti" GOTO:SELECT
+
+::-------------------------------------------------------------------
+:non-arti
+
+set "result_folder=%output_path%"
+set "NON_Volatile_result=%result_folder%\NON_Volatile_result"
+
+if not exist "%NON_Volatile_result%" (
+    mkdir "%NON_Volatile_result%"
+    echo mkdir : NON_Volatile_result
+)
+
+
+
+:: 비휘발성
+:: forecopy_handy
+
+:: MFT
+set "forecopy_handy_path=%tool_path%\forecopy_handy.exe"
+set "output_forecopy_handy=%NON_Volatile_result%"
+"%forecopy_handy_path%" -m "%output_forecopy_handy%"
+echo mft clear
+
+:: LogFile
+set "forecopy_handy_path=%tool_path%\forecopy_handy.exe"
+set "output_forecopy_handy=%NON_Volatile_result%"
+"%forecopy_handy_path%" -f %SystemDrive%\$LogFile "%output_forecopy_handy%"
+echo logfile clear
+
+:: UsnJrnl
+set "forecopy_handy_path=%tool_path%\forecopy_handy.exe"
+set "output_forecopy_handy=%NON_Volatile_result%"
+"%forecopy_handy_path%" -f %SystemDrive%\$Extend\$UsnJrnl:$J "%output_forecopy_handy%"
+echo usnjrnl clear
+
+:: Registry
+set "forecopy_handy_path=%tool_path%\forecopy_handy.exe"
+set "output_forecopy_handy=%NON_Volatile_result%"
+"%forecopy_handy_path%" -g "%output_forecopy_handy%"
+echo reg clear
+:: Amcache
+set "forecopy_handy_path=%tool_path%\forecopy_handy.exe"
+set "output_forecopy_handy=%NON_Volatile_result%\Amcache"
+mkdir "%output_forecopy_handy%"
+"%forecopy_handy_path%" -d %SystemDrive%\Windows\appcompat\Programs "%output_forecopy_handy%"
+echo amcache clear
+
+:: Eventlogs
+set "forecopy_handy_path=%tool_path%\forecopy_handy.exe"
+set "output_forecopy_handy=%NON_Volatile_result%\eventlog"
+mkdir "%output_forecopy_handy%"
+"%forecopy_handy_path%" -e "%output_forecopy_handy%"
+echo eventlog clear
+
+:: Prefetch
+set "forecopy_handy_path=%tool_path%\forecopy_handy.exe"
+set "output_forecopy_handy=%NON_Volatile_result%\Prefetch"
+mkdir "%output_forecopy_handy%"
+"%forecopy_handy_path%" -d %SystemDrive%\Windows\Prefetch "%output_forecopy_handy%"
+echo prefetch clear
+
+:: robocopy
+
+:: LNK-JUMP1
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\AutomaticDestinations"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%AppData%\microsoft\windows\recent\AutomaticDestinations" "%output_robocopy%"
+echo automatic clear
+
+:: LNK-JUMP2
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\CustomDestinations"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%AppData%\microsoft\windows\recent\CustomDestinations" "%output_robocopy%"
+echo custom clear
+
+:: Start_program
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\st_po"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%ProgramData%\Microsoft\Windows\Start Menu\Programs" "%output_robocopy%"
+echo startprgram clear
+
+:: Taskschedulerview
+set "taskschedulerview_path=%tool_path%\taskschedulerview.exe"
+set "output_taskschedulerview=%NON_Volatile_result%\taskschedulerview"
+mkdir "%output_taskschedulerview%"
+"%taskschedulerview_path%" /stext "%output_taskschedulerview%\taskschedulerview.txt"
+echo task clear
+
+::WER
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\WER"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%SystemDrive%\ProgramData\Microsoft\Windows\WER" "%output_robocopy%"
+echo WER clear
+
+:: SRUM
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\robocopy"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%SystemDrive%\Windows\System32\sru" "%output_robocopy%"
+echo SRUM clear
+
+:: VSC
+set "shadowcopyview_path=%tool_path%\shadowcopyview.exe"
+set "output_shadowcopyview=%NON_Volatile_result%\shadowcopyview"
+mkdir "%output_shadowcopyview%"
+"%shadowcopyview_path%" /scomma "%output_shadowcopyview%\shadowcopyview.txt"
+echo vsc clear
+
+:: Windows Timeline
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\WindowTimeLine"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%LOCALAPPDATA%\ConnectedDevicesPlatform" "%output_robocopy%"
+echo timeline clear
+
+:: Shim Cache
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\ShimCache"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%SystemDrive%\Windows\apppatch" "%output_robocopy%"
+echo shim clear
+
+:: RDP Cache
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\RDPCache"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%LOCALAPPDATA%\Microsoft\Terminal Server Client\Cache" "%output_robocopy%"
+echo rdp clear
+
+::set "xcopy_path=%tool_path%\xcopy.exe"
+::set "output_xcopy=%NON_Volatile_result%\RDPCache-xcopy"
+::mkdir %output_xcopy%
+::"%xcopy_path%" /Y /E /H %UserProfile%\Documents\Default.rdp "%output_xcopy%"
+
+:: Thumb Cache
+set "robocopy_path=%tool_path%\robocopy.exe"
+set "output_robocopy=%NON_Volatile_result%\ThumbCache"
+mkdir "%output_robocopy%"
+"%robocopy_path%" /MIR "%UserProfile%\AppData\Local\Microsoft\Windows\Explorer" "%output_robocopy%"
+echo thumb clear
+
+:: Icon Cache
+set "xcopy_path=%tool_path%\xcopy.exe"
+set "output_xcopy=%NON_Volatile_result%\IconCache"
+mkdir "%output_xcopy%""
+"%xcopy_path%" /H %UserProfile%\AppData\Local\IconCache.db "%output_xcopy%"
+echo icon clear
+
+:: 웹 결과
+set "web_view_result=%NON_Volatile_result%\web_result"
+
+if not exist "%web_view_result%" (
+    mkdir "%web_view_result%"
+    echo mkdir : web_view_result
+)
+
+:: web_history
+set "browsinghistoryview_path=%tool_path%\browsinghistoryview.exe"
+set "output_browsinghistoryview=%web_view_result%\browser_history.csv"
+"%browsinghistoryview_path%" /scomma "%output_browsinghistoryview%"
+echo browsing history  clear
+
+:: web_download_list
+set "browserdownloadsview_path=%tool_path%\browserdownloadsview.exe"
+set "output_browserdownloadsview=%web_view_result%\browser_download_list.csv"
+"%browserdownloadsview_path%" /scomma "%output_browserdownloadsview%"
+echo downlist  clear
+
+:: web_addon
+set "browseraddonsview_path=%tool_path%\browseraddonsview.exe"
+set "output_browseraddonsview=%web_view_result%\browser_addon.csv"
+"%browseraddonsview_path%" /scomma "%output_browseraddonsview%"
+ echo webaddon  clear
+
+pause
+GOTO:SELECT
+::-------------------------------------------------------
+
+
+::-------------------------------------------------------
+:END
